@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Dev Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .qr-code {
+            max-width: 300px;
+            margin: 1rem auto;
+            display: block;
+        }
+
+        .payment-option {
+            padding: 1rem;
+            border: 2px solid var(--color-border);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+        }
+
+        .payment-option.active {
+            border-color: var(--color-primary);
+            background: rgba(13, 71, 161, 0.05);
+        }
+
+        @media (max-width: 968px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">Dev Store</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container section">
+        <h1>Checkout</h1>
+
+        <div class="checkout-container">
+            <!-- Order Details Form -->
+            <div>
+                <div class="card">
+                    <h2>Order Information</h2>
+                    <form id="checkoutForm">
+                        <div class="form-group">
+                            <label>User Email</label>
+                            <input type="email" id="userEmail" readonly>
+                        </div>
+
+                        <div id="productRequirements">
+                            <!-- Requirements will be added dynamically -->
+                        </div>
+
+                        <h3 class="mt-3">Payment Method</h3>
+                        <div class="payment-option active" data-method="esewa" onclick="selectPaymentMethod('esewa')">
+                            <strong>📱 eSewa</strong>
+                            <p class="text-muted" style="margin: 0;">Pay via eSewa wallet</p>
+                        </div>
+                        <div class="payment-option" data-method="bank" onclick="selectPaymentMethod('bank')">
+                            <strong>🏦 Bank Transfer</strong>
+                            <p class="text-muted" style="margin: 0;">Direct bank deposit</p>
+                        </div>
+
+                        <div id="paymentQR" class="text-center mt-3">
+                            <!-- QR code will be shown here -->
+                        </div>
+
+                        <h3 class="mt-3">Payment Proof</h3>
+                        <p class="text-muted">Upload your payment screenshot to <a href="https://imgbb.com/"
+                                target="_blank">imgbb.com</a> and paste the link below</p>
+
+                        <div class="form-group">
+                            <label>ImgBB Link</label>
+                            <input type="url" id="paymentProofLink" required placeholder="https://ibb.co/...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Account Number (from which you paid)</label>
+                            <input type="text" id="accountNumber" required placeholder="Your account/mobile number">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Transaction ID/Number</label>
+                            <input type="text" id="transactionId" required placeholder="Transaction reference number">
+                        </div>
+
+                        <h3 class="mt-3">Apply Coupon</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="couponCode" placeholder="Enter coupon code">
+                            <button type="button" class="btn btn-secondary" onclick="applyCoupon()">Apply</button>
+                        </div>
+                        <p id="couponMessage" class="text-success mt-1" style="display: none;"></p>
+
+                        <button type="submit" class="btn btn-primary mt-3" style="width: 100%;">Place Order</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div>
+                <div class="card">
+                    <h2>Order Summary</h2>
+                    <div id="orderSummary">
+                        <!-- Cart items will be listed here -->
+                    </div>
+                    <hr>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Subtotal:</span>
+                        <strong id="subtotal">NPR 0</strong>
+                    </div>
+                    <div id="discountRow" style="display: none; margin-bottom: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="text-success">Discount (<span id="discountPercent"></span>):</span>
+                            <strong class="text-success">- NPR <span id="discountAmount">0</span></strong>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 1.25rem;">
+                        <strong>Total:</strong>
+                        <strong class="text-primary" id="finalTotal">NPR 0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/checkout.js"></script>
+
+    <script>
+        // Protect checkout page
+        protectPage();
+    </script>
+</body>
+
+</html>

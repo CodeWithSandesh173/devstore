@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Store - Gaming & Digital Products</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="images/icon.png" type="image/png">
+</head>
+
+<body>
+    <!-- Announcement Banner -->
+    <div id="announcementBanner" class="announcement-banner" style="display: none;">
+        <p id="announcementText"></p>
+        <button class="close-btn" onclick="closeAnnouncement()">×</button>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">Dev Store</div>
+            <button class="nav-toggle" onclick="toggleMobileMenu()">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="blackfriday.html">Black Friday 🔥</a></li>
+                <li><a href="myorders.html">My Orders</a></li>
+                <li><a href="account.html">Account</a></li>
+                <li><a href="login.html" id="authLink">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="section" style="background: linear-gradient(135deg, #0D47A1 0%, #1976D2 100%); color: white;">
+        <div class="container text-center">
+            <h1 style="color: white; font-size: 3rem; margin-bottom: 1rem;">Welcome to Dev Store</h1>
+            <p style="font-size: 1.25rem; margin-bottom: 2rem; color: rgba(255,255,255,0.9);">Your trusted source for
+                gaming currency, gift cards & digital products</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="shop.html" class="btn"
+                    style="background: white; color: var(--color-primary); font-size: 1.1rem; padding: 1rem 2rem;">Browse
+                    Products</a>
+                <a href="register.html" class="btn btn-outline" id="createAccountBtn"
+                    style="border-color: white; color: white; font-size: 1.1rem; padding: 1rem 2rem;">Create Account</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="section">
+        <div class="container">
+            <h2 class="text-center">Popular Categories</h2>
+            <div class="grid grid-4">
+                <div class="card text-center" style="cursor: pointer;"
+                    onclick="window.location.href='shop.html?category=Mobile Games'">
+                    <h3>🎮 Mobile Games</h3>
+                    <p class="text-muted">PUBG UC, Free Fire Diamonds</p>
+                </div>
+                <div class="card text-center" style="cursor: pointer;"
+                    onclick="window.location.href='shop.html?category=Gift Cards'">
+                    <h3>🎁 Gift Cards</h3>
+                    <p class="text-muted">Steam, iTunes</p>
+                </div>
+                <div class="card text-center" style="cursor: pointer;"
+                    onclick="window.location.href='shop.html?category=Subscriptions'">
+                    <h3>⭐ Subscriptions</h3>
+                    <p class="text-muted">Spotify, Discord Nitro</p>
+                </div>
+                <div class="card text-center" style="cursor: pointer;"
+                    onclick="window.location.href='shop.html?category=Games'">
+                    <h3>🕹️ PC Games</h3>
+                    <p class="text-muted">GTA V, Minecraft, God of War</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="section" style="background: var(--color-background);">
+        <div class="container">
+            <h2 class="text-center">Featured Products</h2>
+            <div id="featuredProducts" class="grid grid-3">
+                <!-- Products will be loaded here -->
+            </div>
+            <div class="text-center mt-4">
+                <a href="shop.html" class="btn btn-primary">View All Products</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="section">
+        <div class="container">
+            <h2 class="text-center">Why Choose Dev Store?</h2>
+            <div class="grid grid-3">
+                <div class="card text-center">
+                    <h3>⚡ Instant Delivery</h3>
+                    <p>Get your products delivered within minutes of purchase</p>
+                </div>
+                <div class="card text-center">
+                    <h3>🔒 Secure Payment</h3>
+                    <p>Safe and trusted payment methods via eSewa & Bank</p>
+                </div>
+                <div class="card text-center">
+                    <h3>💬 24/7 Support</h3>
+                    <p>Our support team is always ready to help you</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Dev Store</h3>
+                    <p>Your trusted source for digital products</p>
+                    <div class="social-links">
+                        <a href="https://discord.com" target="_blank" title="Discord">D</a>
+                        <a href="https://facebook.com" target="_blank" title="Facebook">F</a>
+                        <a href="https://instagram.com" target="_blank" title="Instagram">I</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <a href="shop.html">Shop</a>
+                    <a href="myorders.html">My Orders</a>
+                    <a href="account.html">Account</a>
+                    <a href="legal.html">Legal</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <p>24/7 customer support available</p>
+                    <p>Contact us anytime via chat</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Dev Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <button class="chat-toggle" onclick="toggleChat()">💬</button>
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">24/7 Support</div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" placeholder="Type your message...">
+                <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- Custom Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/announcements.js"></script>
+
+    <script>
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+
+        // Update nav based on auth state
+        onAuthStateChanged(user => {
+            const authLink = document.getElementById('authLink');
+            if (user) {
+                authLink.textContent = 'Logout';
+                authLink.onclick = async (e) => {
+                    e.preventDefault();
+                    await logoutUser();
+                    window.location.reload();
+                };
+            }
+        });
+
+        // Load featured products
+        window.addEventListener('DOMContentLoaded', () => {
+            getAllProducts(products => {
+                const featured = products.slice(0, 3);
+                const container = document.getElementById('featuredProducts');
+
+                featured.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card card';
+                    card.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p class="text-muted">${product.description}</p>
+                        <p class="price">From NPR ${product.packages[0].price}</p>
+                        <a href="shop.html#${product.id}" class="btn btn-primary">View Details</a>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+
+            // Load announcement
+            loadAnnouncement();
+        });
+    </script>
+    <script>
+        // Check auth state to toggle Create Account button
+        auth.onAuthStateChanged(user => {
+            const createAccountBtn = document.getElementById('createAccountBtn');
+            if (user) {
+                // User is logged in, hide Create Account button
+                if (createAccountBtn) createAccountBtn.style.display = 'none';
+            } else {
+                // User is not logged in, show Create Account button
+                if (createAccountBtn) createAccountBtn.style.display = 'inline-block';
+            }
+        });
+    </script>
+</body>
+
+</html>
