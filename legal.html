@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal - Dev Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="images/icon.png" type="image/png">
+    <style>
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--color-border);
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--color-primary);
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">Dev Store</div>
+            <button class="nav-toggle" onclick="toggleMobileMenu()">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="account.html">Account</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container section">
+        <h1>Legal Information</h1>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('privacy')">Privacy Policy</div>
+            <div class="tab" onclick="switchTab('refund')">Refund Policy</div>
+            <div class="tab" onclick="switchTab('terms')">Terms & Conditions</div>
+        </div>
+
+        <!-- Privacy Policy -->
+        <div id="privacy" class="tab-content active">
+            <div class="card">
+                <h2>Privacy Policy</h2>
+                <p><strong>Last Updated:</strong> January 2026</p>
+
+                <h3>Information We Collect</h3>
+                <p>We collect information that you provide directly to us, including:</p>
+                <ul>
+                    <li>Account information (username, email, password)</li>
+                    <li>Payment information (transaction IDs, account numbers)</li>
+                    <li>Order details and purchase history</li>
+                    <li>Chat messages with support team</li>
+                </ul>
+
+                <h3>How We Use Your Information</h3>
+                <p>We use the information we collect to:</p>
+                <ul>
+                    <li>Process your orders and deliver digital products</li>
+                    <li>Communicate with you about your orders</li>
+                    <li>Provide customer support</li>
+                    <li>Improve our services</li>
+                    <li>Send promotional offers (with your consent)</li>
+                </ul>
+
+                <h3>Data Security</h3>
+                <p>We implement appropriate security measures to protect your personal information. All data is stored
+                    securely using Firebase's encrypted database.</p>
+
+                <h3>Contact Us</h3>
+                <p>If you have any questions about our privacy policy, please contact us via our 24/7 support chat.</p>
+            </div>
+        </div>
+
+        <!-- Refund Policy -->
+        <div id="refund" class="tab-content">
+            <div class="card">
+                <h2>Refund Policy</h2>
+                <p><strong>Last Updated:</strong> January 2026</p>
+
+                <h3>Digital Products</h3>
+                <p>Due to the digital nature of our products, all sales are final. We do not offer refunds once a
+                    product code or digital item has been delivered.</p>
+
+                <h3>Exceptions</h3>
+                <p>We may provide refunds in the following circumstances:</p>
+                <ul>
+                    <li>Product code is invalid or already used</li>
+                    <li>Technical error in delivery</li>
+                    <li>Duplicate order (refund for duplicate only)</li>
+                    <li>Wrong product delivered</li>
+                </ul>
+
+                <h3>Refund Process</h3>
+                <p>To request a refund for eligible cases:</p>
+                <ol>
+                    <li>Contact our support team via 24/7 chat</li>
+                    <li>Provide your order ID and reason for refund</li>
+                    <li>Our team will review within 24-48 hours</li>
+                    <li>Approved refunds will be processed within 5-7 business days</li>
+                </ol>
+
+                <h3>Non-Refundable Items</h3>
+                <ul>
+                    <li>Products already redeemed or used</li>
+                    <li>Change of mind after purchase</li>
+                    <li>Incorrect account information provided by customer</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Terms & Conditions -->
+        <div id="terms" class="tab-content">
+            <div class="card">
+                <h2>Terms & Conditions</h2>
+                <p><strong>Last Updated:</strong> January 2026</p>
+
+                <h3>1. Acceptance of Terms</h3>
+                <p>By accessing and using Dev Store, you accept and agree to be bound by these Terms and Conditions.</p>
+
+                <h3>2. Account Registration</h3>
+                <ul>
+                    <li>You must provide accurate and complete information</li>
+                    <li>You are responsible for maintaining account security</li>
+                    <li>One account per person</li>
+                    <li>Accounts found to be fraudulent will be terminated</li>
+                </ul>
+
+                <h3>3. Purchases and Payment</h3>
+                <ul>
+                    <li>All prices are in Nepali Rupees (NPR)</li>
+                    <li>Payment must be made before product delivery</li>
+                    <li>Valid payment proof is required for all orders</li>
+                    <li>We reserve the right to cancel suspicious orders</li>
+                </ul>
+
+                <h3>4. Product Delivery</h3>
+                <ul>
+                    <li>Digital products are delivered via email or in-game</li>
+                    <li>Delivery typically within 24 hours of payment verification</li>
+                    <li>Ensure correct account details are provided</li>
+                </ul>
+
+                <h3>5. Prohibited Activities</h3>
+                <p>You may not:</p>
+                <ul>
+                    <li>Use the service for illegal purposes</li>
+                    <li>Attempt to exploit or hack our systems</li>
+                    <li>Resell products without authorization</li>
+                    <li>Create multiple accounts for fraudulent purposes</li>
+                </ul>
+
+                <h3>6. Limitation of Liability</h3>
+                <p>Dev Store is not liable for:</p>
+                <ul>
+                    <li>Third-party service disruptions</li>
+                    <li>Game publisher policy changes</li>
+                    <li>Account bans from game publishers</li>
+                    <li>Indirect or consequential damages</li>
+                </ul>
+
+                <h3>7. Changes to Terms</h3>
+                <p>We reserve the right to modify these terms at any time. Continued use of the service constitutes
+                    acceptance of modified terms.</p>
+
+                <h3>8. Contact</h3>
+                <p>For questions about these terms, contact us via our 24/7 support chat.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Dev Store</h3>
+                    <div class="social-links">
+                        <a href="https://discord.com" target="_blank">D</a>
+                        <a href="https://facebook.com" target="_blank">F</a>
+                        <a href="https://instagram.com" target="_blank">I</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Dev Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Show selected tab
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+    </script>
+</body>
+
+</html>
