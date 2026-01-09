@@ -37,3 +37,36 @@ function getCurrentUserEmail() {
     const user = auth.currentUser;
     return user ? user.email : null;
 }
+
+// Check and apply Black Friday Theme
+document.addEventListener('DOMContentLoaded', () => {
+    // We use a separate listener to avoid race conditions with other scripts
+    if (typeof database !== 'undefined') {
+        database.ref('settings/theme').on('value', snapshot => {
+            const settings = snapshot.val();
+            if (!settings) return;
+
+            const now = new Date();
+            const isFriday = now.getDay() === 5; // 5 is Friday
+
+            // Logic:
+            // 1. If forcedForce is true, ENABLE.
+            // 2. If auto is true AND it is Friday, ENABLE.
+            // 3. Otherwise, DISABLE.
+
+            let enableTheme = false;
+
+            if (settings.forceBlackFriday) {
+                enableTheme = true;
+            } else if (settings.autoBlackFriday && isFriday) {
+                enableTheme = true;
+            }
+
+            if (enableTheme) {
+                document.body.classList.add('black-friday-theme');
+            } else {
+                document.body.classList.remove('black-friday-theme');
+            }
+        });
+    }
+});

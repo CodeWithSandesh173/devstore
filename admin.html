@@ -97,6 +97,7 @@
             <li onclick="showSection('coupons')">🎫 Coupons</li>
             <li onclick="showSection('announcements')">📢 Announcements</li>
             <li onclick="showSection('blackfriday')">🔥 Black Friday</li>
+            <li onclick="showSection('settings')">⚙️ Settings</li>
             <li onclick="window.location.href='admin-chat.html'">💬 Chats</li>
             <li onclick="logoutAdmin()">🚪 Logout</li>
         </ul>
@@ -104,6 +105,36 @@
 
     <!-- Main Content -->
     <div class="main-content">
+        <!-- Settings Section -->
+        <div id="settings" class="admin-section">
+            <h1>Site Settings</h1>
+            <div class="card">
+                <h3>Black Friday Theme Control</h3>
+                <p class="text-muted">Control when the website switches to the Dark/Red "Black Friday" theme.</p>
+
+                <div class="form-group mt-3">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="settingAutoBF" style="width: auto; margin-right: 10px;">
+                        <strong>Automatic (Every Friday)</strong>
+                    </label>
+                    <p class="text-muted" style="margin-left: 25px; font-size: 0.9rem;">
+                        Automatically turns on the theme every Friday (server time).
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="settingForceBF" style="width: auto; margin-right: 10px;">
+                        <strong>Force Enable Now</strong>
+                    </label>
+                    <p class="text-muted" style="margin-left: 25px; font-size: 0.9rem;">
+                        Immediately turns on the theme regardless of the day.
+                    </p>
+                </div>
+
+                <button class="btn btn-primary" onclick="saveSiteSettings()">Save Settings</button>
+            </div>
+        </div>
         <!-- Dashboard Section -->
         <div id="dashboard" class="admin-section active">
             <h1>Dashboard</h1>

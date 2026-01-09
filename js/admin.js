@@ -40,10 +40,33 @@ function loadSectionData(sectionName) {
         case 'blackfriday':
             loadBlackFridayDeals();
             break;
+        case 'settings':
+            loadSiteSettings();
+            break;
         case 'chats':
             loadChatsList();
             break;
     }
+}
+
+// ===== SETTINGS =====
+function loadSiteSettings() {
+    database.ref('settings/theme').once('value', snapshot => {
+        const settings = snapshot.val() || {};
+        document.getElementById('settingAutoBF').checked = settings.autoBlackFriday || false;
+        document.getElementById('settingForceBF').checked = settings.forceBlackFriday || false;
+    });
+}
+
+function saveSiteSettings() {
+    const settings = {
+        autoBlackFriday: document.getElementById('settingAutoBF').checked,
+        forceBlackFriday: document.getElementById('settingForceBF').checked
+    };
+
+    database.ref('settings/theme').set(settings)
+        .then(() => alert('Settings saved successfully! Website theme will update.'))
+        .catch(error => alert('Error: ' + error.message));
 }
 
 // ===== DASHBOARD ===== 

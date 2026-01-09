@@ -114,6 +114,7 @@ const productsData = [
         name: "God of War",
         category: "Games",
         image: "images/godofwar.png",
+        description: "God of War (PC) - Steam Key Global",
         packages: [
             { label: "Steam Key", price: 6360 }
         ]

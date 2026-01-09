@@ -17,6 +17,10 @@
             ".read": true,
             ".write": "auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com'"
         },
+        "settings": {
+            ".read": true,
+            ".write": "auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com'"
+        },
         "users": {
             "$uid": {
                 ".read": "$uid === auth.uid || (auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com')",
