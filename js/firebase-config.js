@@ -38,24 +38,43 @@ function getCurrentUserEmail() {
     return user ? user.email : null;
 }
 
-// Check and apply Black Friday Theme
+// Theme Toggle Logic
+function toggleTheme() {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+
+    const isDark = body.classList.contains('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateThemeIcon(isDark);
+}
+
+function updateThemeIcon(isDark) {
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) {
+        btn.textContent = isDark ? '☀️' : '🌙';
+        btn.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    }
+}
+
+// Initialize Theme
 document.addEventListener('DOMContentLoaded', () => {
-    // We use a separate listener to avoid race conditions with other scripts
+    // Check localStorage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        updateThemeIcon(true);
+    }
+
+    // Black Friday Logic (Keep existing)
     if (typeof database !== 'undefined') {
         database.ref('settings/theme').on('value', snapshot => {
             const settings = snapshot.val();
             if (!settings) return;
 
             const now = new Date();
-            const isFriday = now.getDay() === 5; // 5 is Friday
-
-            // Logic:
-            // 1. If forcedForce is true, ENABLE.
-            // 2. If auto is true AND it is Friday, ENABLE.
-            // 3. Otherwise, DISABLE.
+            const isFriday = now.getDay() === 5;
 
             let enableTheme = false;
-
             if (settings.forceBlackFriday) {
                 enableTheme = true;
             } else if (settings.autoBlackFriday && isFriday) {
@@ -64,6 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (enableTheme) {
                 document.body.classList.add('black-friday-theme');
+                // Remove dark mode logic if BF is active to avoid conflict? 
+                // Or let CSS cascade handle it (BF is defined after in CSS, so it wins).
             } else {
                 document.body.classList.remove('black-friday-theme');
             }

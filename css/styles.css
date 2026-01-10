@@ -28,7 +28,40 @@
     --transition: all 0.3s ease;
 }
 
-/* Black Friday Theme */
+/* User Dark Mode */
+body.dark-mode {
+    --color-white: #1F2937; /* Dark Grey background */
+    --color-primary: #3B82F6; /* Blue primary */
+    --color-primary-dark: #1D4ED8;
+    --color-secondary: #60A5FA;
+    --color-text: #F3F4F6; /* Light Text */
+    --color-text-light: #D1D5DB;
+    --color-border: #374151;
+    --color-background: #111827; /* Darker background */
+    --box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .card,
+body.dark-mode header,
+body.dark-mode nav,
+body.dark-mode .modal-content,
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+    background-color: var(--color-white);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+body.dark-mode input::placeholder {
+    color: var(--color-text-light);
+}
+
+body.dark-mode footer {
+    background-color: #000000;
+}
+
+/* Black Friday Theme (Overrides Dark Mode if active) */
 body.black-friday-theme {
     --color-white: #111827;
     /* Dark background */

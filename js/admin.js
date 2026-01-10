@@ -727,31 +727,63 @@ function startOrderListener() {
     console.log(`[Notification] Listening for orders after: ${now}`);
 
     // Listen for orders added after 'now'
-    // Note: 'createdAt' is ISO string, so lexicographical comparison works for ISO dates
     database.ref('orders').orderByChild('createdAt').startAt(now).on('child_added', snapshot => {
         const order = snapshot.val();
         const orderId = snapshot.key;
         console.log("[Notification] New order detected:", orderId);
-        showNotification(orderId, order);
+        showNotification(orderId, order, 'order');
+    });
+
+    // START CHAT LISTENER
+    // Listen for changes in chats metadata to detect new messages
+    database.ref('chats').on('child_changed', snapshot => {
+        const chat = snapshot.val();
+        const chatId = snapshot.key;
+        const metadata = chat.metadata;
+
+        // Check if the change is a new message from USER (not support)
+        // We check if lastMessageTime is recent (after page load) 
+        // AND checks if we haven't already notified for this likely. 
+        // Simplest is to trust "lastMessageTime" > now.
+
+        if (metadata && metadata.lastMessageTime > now && metadata.unreadCount > 0) {
+            // To verify if sender is user, we might need to check the last message or rely on unreadCount increasing
+            // unreadCount increasing usually means user sent something since admin resets it to 0 when reading.
+            showNotification(chatId, metadata, 'chat');
+        }
     });
 }
 
-function showNotification(orderId, order) {
-    const title = "New Order Received! 💰";
-    const body = `Order #${orderId.substring(0, 5)}... by ${order.userEmail}\nTotal: NPR ${order.total}`;
+function showNotification(id, data, type) {
+    let title, body, tag, icon;
+
+    if (type === 'order') {
+        title = "New Order Received! 💰";
+        body = `Order #${id.substring(0, 5)}... by ${data.userEmail}\nTotal: NPR ${data.total}`;
+        tag = 'order_' + id;
+        icon = 'images/icon.png';
+    } else if (type === 'chat') {
+        title = "New Message from " + (data.userEmail || "Guest");
+        body = data.lastMessage;
+        tag = 'chat_' + id + '_' + data.lastMessageTime; // Unique per message time
+        icon = 'images/icon.png';
+    }
 
     // Create notification
     const notification = new Notification(title, {
         body: body,
-        icon: 'images/icon.png', // path to icon
-        tag: orderId // prevents duplicate notifications for the same order
+        icon: icon,
+        tag: tag
     });
 
     // Focus window on click
     notification.onclick = function () {
         window.focus();
-        // Switch to orders tab
-        showSection('orders');
+        if (type === 'order') {
+            showSection('orders');
+        } else if (type === 'chat') {
+            window.location.href = 'admin-chat.html';
+        }
         this.close();
     };
 }

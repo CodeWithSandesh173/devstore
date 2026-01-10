@@ -94,6 +94,11 @@ function displayMessage(message) {
         <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 0.25rem;">${time}</div>
     `;
     messagesContainer.appendChild(messageDiv);
+
+    // Notify if message is from SUPPORT
+    if (message.sender === 'support') {
+        showUserNotification(message.text);
+    }
 }
 
 // Send message
@@ -168,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize chat when page loads
     setTimeout(initializeChat, 1000);
+    setTimeout(initChatNotifications, 2000); // Ask/setup notify after a bit
 });
 
 // Clean up on page unload
@@ -177,3 +183,65 @@ window.addEventListener('beforeunload', () => {
         database.ref(`chats/${currentChatId}/metadata/lastActive`).set(new Date().toISOString());
     }
 });
+
+// ===== USER NOTIFICATIONS =====
+function initChatNotifications() {
+    // Add bell icon to header if needed
+    const header = document.querySelector('.chat-header');
+    if (header) {
+        // Create toggle button if not exists
+        if (!document.getElementById('chatNotifyBtn')) {
+            const btn = document.createElement('span');
+            btn.id = 'chatNotifyBtn';
+            btn.style.cursor = 'pointer';
+            btn.style.float = 'right';
+            btn.title = "Enable Notifications";
+            btn.innerHTML = '🔔';
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                requestChatPermission();
+            };
+            header.appendChild(btn);
+
+            // Check current state
+            if (Notification.permission === 'granted') {
+                btn.innerHTML = '✅';
+                btn.title = "Notifications Active";
+            }
+        }
+    }
+}
+
+function requestChatPermission() {
+    Notification.requestPermission().then(permission => {
+        const btn = document.getElementById('chatNotifyBtn');
+        if (permission === "granted") {
+            if (btn) {
+                btn.innerHTML = '✅';
+                btn.title = "Notifications Active";
+            }
+            // Logic handled in displayMessage
+        } else {
+            if (btn) {
+                btn.innerHTML = '❌';
+                btn.title = "Notifications Denied";
+            }
+        }
+    });
+}
+
+function showUserNotification(text) {
+    if (document.hidden && Notification.permission === "granted") {
+        const n = new Notification("Dev Store Support", {
+            body: text,
+            icon: 'images/icon.png'
+        });
+        n.onclick = () => {
+            window.focus();
+            const chatWindow = document.getElementById('chatWindow');
+            if (chatWindow && !chatWindow.classList.contains('active')) {
+                toggleChat();
+            }
+        };
+    }
+}
