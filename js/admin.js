@@ -648,4 +648,64 @@ function logoutAdmin() {
 // Load dashboard on page load
 window.addEventListener('DOMContentLoaded', () => {
     loadDashboardStats();
+    initNotifications();
 });
+
+// ===== NOTIFICATIONS =====
+let notificationListenerActive = false;
+
+function initNotifications() {
+    // Wait for auth to be ready
+    auth.onAuthStateChanged(user => {
+        if (user && user.email === ADMIN_EMAIL) {
+            // Request permission if not already granted/denied
+            if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        startOrderListener();
+                    }
+                });
+            } else if (Notification.permission === "granted") {
+                startOrderListener();
+            }
+        }
+    });
+}
+
+function startOrderListener() {
+    if (notificationListenerActive) return;
+    notificationListenerActive = true;
+
+    // We only want to notify for *new* orders that come in AFTER the page loads.
+    // So we use the current time as a baseline.
+    const now = new Date().toISOString();
+
+    // Listen for orders added after 'now'
+    // Note: 'createdAt' is ISO string, so lexicographical comparison works for ISO dates
+    database.ref('orders').orderByChild('createdAt').startAt(now).on('child_added', snapshot => {
+        const order = snapshot.val();
+        const orderId = snapshot.key;
+
+        showNotification(orderId, order);
+    });
+}
+
+function showNotification(orderId, order) {
+    const title = "New Order Received! 💰";
+    const body = `Order #${orderId.substring(0, 5)}... by ${order.userEmail}\nTotal: NPR ${order.total}`;
+
+    // Create notification
+    const notification = new Notification(title, {
+        body: body,
+        icon: 'images/icon.png', // path to icon
+        tag: orderId // prevents duplicate notifications for the same order
+    });
+
+    // Focus window on click
+    notification.onclick = function () {
+        window.focus();
+        // Switch to orders tab
+        showSection('orders');
+        this.close();
+    };
+}
