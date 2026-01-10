@@ -652,24 +652,69 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== NOTIFICATIONS =====
+// ===== NOTIFICATIONS =====
 let notificationListenerActive = false;
 
 function initNotifications() {
+    console.log("[Notification] Initializing...");
     // Wait for auth to be ready
     auth.onAuthStateChanged(user => {
         if (user && user.email === ADMIN_EMAIL) {
-            // Request permission if not already granted/denied
-            if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        startOrderListener();
-                    }
-                });
-            } else if (Notification.permission === "granted") {
-                startOrderListener();
-            }
+            console.log("[Notification] Admin detected.");
+            checkNotificationPermission();
+        } else {
+            console.log("[Notification] Not admin or not logged in.");
         }
     });
+}
+
+function checkNotificationPermission() {
+    if (Notification.permission === "granted") {
+        console.log("[Notification] Permission already granted.");
+        startOrderListener();
+        updateNotificationButton(true);
+    } else if (Notification.permission === "denied") {
+        console.warn("[Notification] Permission denied. User must enable manually in settings.");
+        updateNotificationButton(false, "Denied");
+    } else {
+        console.log("[Notification] Permission needed.");
+        updateNotificationButton(false);
+    }
+}
+
+function enableNotifications() {
+    if (Notification.permission === "granted") {
+        alert("Notifications already enabled!");
+        return;
+    }
+
+    Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+            console.log("[Notification] Permission granted by user.");
+            startOrderListener();
+            updateNotificationButton(true);
+        } else {
+            console.warn("[Notification] Permission denied by user.");
+            updateNotificationButton(false, "Denied");
+        }
+    });
+}
+
+function updateNotificationButton(enabled, labelOverride) {
+    const btn = document.getElementById('enableNotifyBtn');
+    if (!btn) return;
+
+    if (enabled) {
+        btn.textContent = "✅ Notifications Active";
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-success');
+        btn.disabled = true;
+    } else {
+        btn.textContent = labelOverride ? `❌ Notifications ${labelOverride}` : "🔔 Enable Notifications";
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-warning');
+        btn.disabled = false;
+    }
 }
 
 function startOrderListener() {
@@ -679,13 +724,14 @@ function startOrderListener() {
     // We only want to notify for *new* orders that come in AFTER the page loads.
     // So we use the current time as a baseline.
     const now = new Date().toISOString();
+    console.log(`[Notification] Listening for orders after: ${now}`);
 
     // Listen for orders added after 'now'
     // Note: 'createdAt' is ISO string, so lexicographical comparison works for ISO dates
     database.ref('orders').orderByChild('createdAt').startAt(now).on('child_added', snapshot => {
         const order = snapshot.val();
         const orderId = snapshot.key;
-
+        console.log("[Notification] New order detected:", orderId);
         showNotification(orderId, order);
     });
 }
