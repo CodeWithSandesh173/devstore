@@ -229,14 +229,18 @@
                     const chatId = child.key;
                     const chatData = child.val();
                     const metadata = chatData.metadata || {};
+                    const messages = chatData.messages || {};
 
-                    chats.push({
-                        id: chatId,
-                        email: metadata.userEmail || 'Guest User',
-                        lastMessage: metadata.lastMessage || 'No messages',
-                        lastActive: metadata.lastActive || metadata.lastMessageTime,
-                        unreadCount: metadata.unreadCount || 0
-                    });
+                    // Only show chats that have messages
+                    if (Object.keys(messages).length > 0) {
+                        chats.push({
+                            id: chatId,
+                            email: metadata.userEmail || 'Guest User',
+                            lastMessage: metadata.lastMessage || 'Image/Attachment',
+                            lastActive: metadata.lastActive || metadata.lastMessageTime,
+                            unreadCount: metadata.unreadCount || 0
+                        });
+                    }
                 });
 
                 // Sort by last active
@@ -298,6 +302,55 @@
 
             // Load messages
             loadMessages(chatId);
+
+            // Check blocked status
+            checkUserBlockedStatus(chatId);
+        }
+
+        // Check user blocked status
+        function checkUserBlockedStatus(chatId) {
+            // Only check for actual users, not guests
+            if (chatId.startsWith('guest_')) return;
+
+            database.ref(`users/${chatId}/blocked`).once('value')
+                .then(snapshot => {
+                    const isBlocked = snapshot.val() === true;
+                    renderBlockButton(isBlocked);
+                });
+        }
+
+        function renderBlockButton(isBlocked) {
+            const header = document.getElementById('chatHeader');
+            // Remove old button if exists
+            const oldBtn = document.getElementById('blockUserBtn');
+            if (oldBtn) oldBtn.remove();
+
+            const btn = document.createElement('button');
+            btn.id = 'blockUserBtn';
+            btn.className = isBlocked ? 'btn btn-success' : 'btn btn-danger';
+            btn.textContent = isBlocked ? '✅ Unblock User' : '🚫 Block User';
+            btn.style.marginLeft = 'auto'; // Push to right
+            btn.style.padding = '0.5rem 1rem';
+            btn.style.fontSize = '0.9rem';
+
+            btn.onclick = () => toggleBlockStatus(currentChatId, isBlocked);
+
+            header.appendChild(btn);
+        }
+
+        function toggleBlockStatus(chatId, currentStatus) {
+            if (!chatId) return;
+            const newStatus = !currentStatus;
+            const action = newStatus ? 'block' : 'unblock';
+
+            if (confirm(`Are you sure you want to ${action} this user? Blocked users cannot place orders.`)) {
+                database.ref(`users/${chatId}/blocked`).set(newStatus)
+                    .then(() => {
+                        renderBlockButton(newStatus);
+                        alert(`User has been ${action}ed.`);
+                    })
+                    .catch(error => alert('Error: ' + error.message));
+            }
         }
 
         // Load messages for a chat

@@ -166,13 +166,15 @@
 
             let html = `
                 <div class="grid-2">
-                    <div>
                         <h3>Customer Info</h3>
                         ${row('Email', order.userEmail)}
                         ${row('User ID', order.userId)}
                         <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
                         <p><strong>Status:</strong> <span style="display:inline-block; padding:4px 12px; border-radius:4px; background:${statusColor}; color:white; font-weight:bold; font-size:0.9rem;">${order.status.toUpperCase()}</span></p>
-                    </div>
+                        
+                        <div id="blockUserContainer" style="margin-top: 15px;">
+                            <!-- Block button injected here -->
+                        </div>
                     <div>
                         <h3>Payment Info</h3>
                         <p><strong>Method:</strong> ${order.paymentMethod || 'N/A'}</p>
@@ -262,6 +264,45 @@
             container.innerHTML = html;
             container.style.display = 'block';
             loading.style.display = 'none';
+
+            // Check block status
+            checkUserBlockedStatus(order.userId);
+        }
+
+        // Check user blocked status
+        function checkUserBlockedStatus(userId) {
+            firebase.database().ref(`users/${userId}/blocked`).once('value')
+                .then(snapshot => {
+                    const isBlocked = snapshot.val() === true;
+                    renderBlockButton(userId, isBlocked);
+                });
+        }
+
+        function renderBlockButton(userId, isBlocked) {
+            const container = document.getElementById('blockUserContainer');
+            if (!container) return; // Should exist if renderOrder called
+
+            container.innerHTML = `
+                <button onclick="toggleBlockStatus('${userId}', ${isBlocked})" 
+                    class="btn ${isBlocked ? 'btn-success' : 'btn-danger'}" 
+                    style="width:100%; font-size:0.9rem;">
+                    ${isBlocked ? '✅ Unblock User' : '🚫 Block User'}
+                </button>
+            `;
+        }
+
+        function toggleBlockStatus(userId, currentStatus) {
+            const newStatus = !currentStatus;
+            const action = newStatus ? 'block' : 'unblock';
+
+            if (confirm(`Are you sure you want to ${action} this user? Blocked users cannot place orders.`)) {
+                firebase.database().ref(`users/${userId}/blocked`).set(newStatus)
+                    .then(() => {
+                        renderBlockButton(userId, newStatus);
+                        alert(`User has been ${action}ed.`);
+                    })
+                    .catch(error => alert('Error: ' + error.message));
+            }
         }
     </script>
 </body>

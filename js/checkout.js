@@ -29,6 +29,36 @@ window.addEventListener('DOMContentLoaded', () => {
     // Load user email
     onAuthStateChanged(user => {
         if (user) {
+            // Check if blocked
+            database.ref(`users/${user.uid}/blocked`).once('value').then(snapshot => {
+                if (snapshot.val() === true) {
+                    const checkoutForm = document.getElementById('checkoutForm');
+                    const placeOrderBtn = document.getElementById('placeOrderBtn');
+
+                    // Disable button
+                    placeOrderBtn.disabled = true;
+                    placeOrderBtn.innerText = "🚫 Account Blocked";
+                    placeOrderBtn.classList.remove('btn-primary');
+                    placeOrderBtn.classList.add('btn-danger');
+
+                    // Show Warning
+                    const warningDiv = document.createElement('div');
+                    warningDiv.className = 'alert alert-danger mt-3';
+                    warningDiv.style.border = '1px solid #dc3545';
+                    warningDiv.style.padding = '10px';
+                    warningDiv.style.borderRadius = '5px';
+                    warningDiv.style.backgroundColor = '#f8d7da';
+                    warningDiv.style.color = '#721c24';
+                    warningDiv.innerHTML = `
+                        <strong>🚫 Account Blocked</strong><br>
+                        Your account has been blocked by the administrator. You cannot place new orders.<br>
+                        Please contact support via chat for more information.
+                    `;
+
+                    checkoutForm.insertBefore(warningDiv, placeOrderBtn);
+                }
+            });
+
             document.getElementById('userEmail').value = user.email;
             loadRequirementFields();
             displayOrderSummary(); // Initial display
