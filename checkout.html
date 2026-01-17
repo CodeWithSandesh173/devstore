@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Dev Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .qr-code {
+            max-width: 300px;
+            margin: 1rem auto;
+            display: block;
+        }
+
+        .payment-option {
+            padding: 1rem;
+            border: 2px solid var(--color-border);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+        }
+
+        .payment-option.active {
+            border-color: var(--color-primary);
+            background: rgba(13, 71, 161, 0.05);
+        }
+
+        @media (max-width: 968px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+            }
+
+            .checkout-sidebar {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">Dev Store</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container section">
+        <h1>Checkout</h1>
+
+        <div class="checkout-container">
+            <!-- LEFT COLUMN: Forms -->
+            <div class="checkout-main">
+                <!-- 1. Country Selection -->
+                <div class="card mb-2">
+                    <h3>1. Select Country 🌍</h3>
+                    <div class="form-group">
+                        <label for="countrySelect">Choose Your Country</label>
+                        <select id="countrySelect" class="form-control" onchange="updateCountry(this.value)">
+                            <option value="">-- Select Country --</option>
+                            <option value="nepal">Nepal 🇳🇵</option>
+                            <option value="india">India 🇮🇳</option>
+                            <option value="pakistan">Pakistan 🇵🇰</option>
+                            <option value="bangladesh">Bangladesh 🇧🇩</option>
+                        </select>
+                        <p id="countryMessage" class="mt-1" style="display:none;font-weight:bold;"></p>
+                    </div>
+                </div>
+
+                <!-- 2. Order Details Form -->
+                <div class="card">
+                    <h3>2. Order Details</h3>
+                    <form id="checkoutForm">
+                        <div class="form-group">
+                            <label>User Email</label>
+                            <input type="email" id="userEmail" readonly>
+                        </div>
+
+                        <div id="productRequirements">
+                            <!-- Requirements will be added dynamically -->
+                        </div>
+
+                        <!-- Payment Section (Hidden until country selected) -->
+                        <div id="paymentSection" style="display:none;">
+                            <h3 class="mt-3">3. Payment Method</h3>
+
+                            <!-- Payment Options Container -->
+                            <div id="paymentMethodsContainer">
+                                <!-- Injected via JS based on Country -->
+                            </div>
+
+                            <div id="paymentQR" class="text-center mt-3">
+                                <!-- QR code will be shown here -->
+                            </div>
+
+                            <h3 class="mt-3">Payment Proof</h3>
+                            <p class="text-muted">Upload your payment screenshot (Max 1MB)</p>
+
+                            <div class="form-group">
+                                <label>Upload Screenshot</label>
+                                <input type="file" id="paymentProofFile" accept="image/*" required
+                                    onchange="handleImageUpload(this)">
+                                <small class="text-muted">Accepted formats: JPG, PNG, JPEG (Max 1MB)</small>
+                            </div>
+
+                            <div id="imagePreviewContainer" style="display: none; margin-top: 1rem;">
+                                <label>Preview:</label>
+                                <img id="imagePreview"
+                                    style="max-width: 100%; max-height: 300px; border: 2px solid var(--color-border); border-radius: var(--border-radius); display: block;">
+                                <p id="imageInfo" class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">
+                                </p>
+                            </div>
+
+                            <div id="uploadProgress" style="display: none; margin-top: 1rem;">
+                                <div style="background: #e0e0e0; border-radius: 4px; height: 8px; width: 100%;">
+                                    <div id="uploadProgressBar"
+                                        style="background: var(--color-success); height: 8px; border-radius: 4px; width: 0%; transition: width 0.3s;">
+                                    </div>
+                                </div>
+                                <p id="uploadStatus" class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">
+                                    Processing image...</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Account Number (from which you paid)</label>
+                                <input type="text" id="accountNumber" required placeholder="Your account/mobile number">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Transaction ID/Number</label>
+                                <input type="text" id="transactionId" required
+                                    placeholder="Transaction reference number">
+                            </div>
+
+                            <h3 class="mt-3">Apply Coupon</h3>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="couponCode" placeholder="Enter coupon code">
+                                <button type="button" class="btn btn-secondary" onclick="applyCoupon()">Apply</button>
+                            </div>
+                            <p id="couponMessage" class="text-success mt-1" style="display: none;"></p>
+
+                            <button type="submit" id="placeOrderBtn" class="btn btn-primary mt-3"
+                                style="width: 100%;">Place Order</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Order Summary -->
+            <div class="checkout-sidebar">
+                <div class="card">
+                    <h2>Order Summary</h2>
+                    <div id="orderSummary">
+                        <!-- Cart items will be listed here -->
+                    </div>
+                    <hr>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Subtotal:</span>
+                        <strong id="subtotal">NPR 0</strong>
+                    </div>
+                    <div id="discountRow" style="display: none; margin-bottom: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="text-success">Discount (<span id="discountPercent"></span>):</span>
+                            <strong class="text-success">- <span id="discountAmount">0</span></strong>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 1.25rem;">
+                        <strong>Total:</strong>
+                        <strong class="text-primary" id="finalTotal">NPR 0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/checkout.js"></script>
+
+    <script>
+        // Protect checkout page
+        protectPage();
+    </script>
+</body>
+
+</html>

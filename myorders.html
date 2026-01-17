@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Dev Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="images/icon.png" type="image/png">
+    <style>
+        .order-card {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .status-processing {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .status-completed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-cancelled {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">Dev Store</div>
+            <button class="nav-toggle" onclick="toggleMobileMenu()">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="myorders.html" class="active">My Orders</a></li>
+                <li><a href="account.html">Account</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container section">
+        <h1>My Orders</h1>
+
+        <div id="ordersContainer">
+            <!-- Orders will be loaded here -->
+        </div>
+
+        <div id="emptyState" style="display: none; text-align: center; padding: 3rem;">
+            <h2>No Orders Yet</h2>
+            <p class="text-muted">You haven't placed any orders yet.</p>
+            <a href="shop.html" class="btn btn-primary mt-3">Start Shopping</a>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal" id="orderModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeOrderModal()">×</button>
+            <div id="orderDetails"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Dev Store</h3>
+                    <p>Your trusted source for digital products</p>
+                    <div class="social-links">
+                        <a href="https://discord.gg/pFAVbwDu35" target="_blank" title="Discord">D</a>
+                        <a href="https://www.facebook.com/profile.php?id=61585887697031" target="_blank"
+                            title="Facebook">F</a>
+                        <a href="https://instagram.com/devstorenepal" target="_blank" title="Instagram">I</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <a href="shop.html">Shop</a>
+                    <a href="myorders.html">My Orders</a>
+                    <a href="account.html">Account</a>
+                    <a href="legal.html">Legal</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <p>24/7 customer support available</p>
+                    <p>Contact us anytime via chat</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Dev Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        protectPage();
+
+        function toggleMobileMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+
+        // Wait for auth to load, then load orders
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loadUserOrders(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function formatCurrency(value) {
+            if (!value) return 'NPR 0';
+            const str = String(value);
+            if (str.match(/[a-zA-Z]/)) return str; // Already has currency code
+            return `NPR ${value}`; // Default to NPR
+        }
+
+        function loadUserOrders(userId) {
+            const container = document.getElementById('ordersContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            // Show loading
+            container.innerHTML = '<p class="text-center" style="padding: 2rem;">Loading orders...</p>';
+            emptyState.style.display = 'none';
+
+            database.ref('orders').orderByChild('userId').equalTo(userId).once('value')
+                .then(snapshot => {
+                    if (!snapshot.exists()) {
+                        container.innerHTML = '';
+                        emptyState.style.display = 'block';
+                        return;
+                    }
+
+                    container.innerHTML = '';
+                    emptyState.style.display = 'none';
+
+                    const orders = [];
+                    snapshot.forEach(child => {
+                        orders.push({ id: child.key, ...child.val() });
+                    });
+
+                    // Sort by date (newest first)
+                    orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                    orders.forEach(order => {
+                        const card = document.createElement('div');
+                        card.className = 'card order-card';
+
+                        const orderDate = new Date(order.createdAt);
+                        const formattedDate = orderDate.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        // Handle mixed legacy data
+                        const totalDisplay = formatCurrency(order.total);
+
+                        card.innerHTML = `
+                            <div class="order-header">
+                                <div>
+                                    <strong>Order #${order.id.substring(0, 8).toUpperCase()}</strong>
+                                    <p class="text-muted" style="margin: 0;">${formattedDate}</p>
+                                </div>
+                                <span class="status-badge status-${order.status}">${order.status.toUpperCase()}</span>
+                            </div>
+                            <div style="background: var(--color-background); padding: 1rem; border-radius: var(--border-radius); margin: 1rem 0;">
+                                <p style="margin-bottom: 0.5rem;"><strong>Product:</strong> ${order.items[0].productName}</p>
+                                <p style="margin-bottom: 0.5rem;"><strong>Package:</strong> ${order.items[0].package}</p>
+                                <p style="margin-bottom: 0.5rem;"><strong>Payment Method:</strong> ${order.paymentMethod ? order.paymentMethod.toUpperCase() : 'N/A'}</p>
+                                <p style="margin-bottom: 0;"><strong>Total Paid:</strong> ${totalDisplay}</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="showOrderDetails('${order.id}')">View Full Details</button>
+                        `;
+                        container.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading orders:', error);
+                    container.innerHTML = '<p class="text-center text-danger" style="padding: 2rem;">Error loading orders. Please refresh the page.</p>';
+                });
+        }
+
+        function showOrderDetails(orderId) {
+            database.ref(`orders/${orderId}`).once('value')
+                .then(snapshot => {
+                    const order = snapshot.val();
+                    const modal = document.getElementById('orderModal');
+                    const details = document.getElementById('orderDetails');
+
+                    const totalDisplay = formatCurrency(order.total);
+                    const subtotalDisplay = formatCurrency(order.subtotal);
+
+                    details.innerHTML = `
+                        <h2>Order #${orderId.substring(0, 8).toUpperCase()}</h2>
+                        
+                        <div style="background: var(--color-background); padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem;">
+                            <h3>Order Information</h3>
+                            <p><strong>Status:</strong> <span class="status-badge status-${order.status}">${order.status.toUpperCase()}</span></p>
+                            <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+                            <p><strong>Order ID:</strong> ${orderId}</p>
+                        </div>
+                        
+                        <div style="background: var(--color-background); padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem;">
+                            <h3>Product Details</h3>
+                            ${order.items.map(item => `
+                                <p><strong>${item.productName}</strong> - ${item.package}</p>
+                                <p class="text-primary"><strong>NPR ${item.price}</strong> <small>(Base Price)</small></p>
+                            `).join('')}
+                        </div>
+                        
+                        <div style="background: var(--color-background); padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem;">
+                            <h3>Your Requirements</h3>
+                            ${order.requirements ? Object.keys(order.requirements).map(key => `
+                                <p><strong>${key.replace(/_/g, ' ').toUpperCase()}:</strong> ${order.requirements[key]}</p>
+                            `).join('') : '<p>No specific requirements.</p>'}
+                        </div>
+                        
+                        <div style="background: var(--color-background); padding: 1rem; border-radius: var(--border-radius);">
+                            <h3>Payment Information</h3>
+                            <p><strong>Method:</strong> ${order.paymentMethod ? order.paymentMethod.toUpperCase() : 'N/A'}</p>
+                            <p><strong>Subtotal (Approx):</strong> ${subtotalDisplay}</p>
+                            ${order.discount ? `<p class="text-success"><strong>Discount (${order.discount}%):</strong> Applied</p>` : ''}
+                            <p><strong>Total Paid:</strong> ${totalDisplay}</p>
+                        </div>
+                    `;
+
+                    modal.classList.add('active');
+                })
+                .catch(error => {
+                    console.error('Error loading order details:', error);
+                    alert('Error loading order details. Please try again.');
+                });
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

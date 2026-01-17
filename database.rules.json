@@ -1,0 +1,51 @@
+{
+    "rules": {
+        ".read": "auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com'",
+        "products": {
+            ".read": true,
+            ".write": "auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com'"
+        },
+        "coupons": {
+            ".read": true,
+            ".write": "auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com'"
+        },
+        "announcement": {
+            ".read": true,
+            ".write": "auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com'"
+        },
+        "blackFriday": {
+            ".read": true,
+            ".write": "auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com'"
+        },
+        "settings": {
+            ".read": true,
+            ".write": "auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com'"
+        },
+        "users": {
+            "$uid": {
+                ".read": "$uid === auth.uid || (auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com')",
+                ".write": "$uid === auth.uid || (auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com')"
+            }
+        },
+        "orders": {
+            ".read": "auth != null && (auth.token.email === 'bhandaryshandesh2@gmail.com' || (query.orderByChild === 'userId' && query.equalTo === auth.uid))",
+            "$orderId": {
+                ".read": "auth != null && (auth.token.email === 'bhandaryshandesh2@gmail.com' || data.child('userId').val() === auth.uid)",
+                ".write": "auth != null && ((!data.exists() && newData.child('userId').val() === auth.uid) || (data.exists() && data.child('userId').val() === auth.uid) || auth.token.email === 'bhandaryshandesh2@gmail.com')",
+                ".validate": "newData.hasChildren(['userId', 'items', 'total'])"
+            },
+            ".indexOn": [
+                "userId",
+                "status",
+                "createdAt"
+            ]
+        },
+        "chats": {
+            ".read": "auth != null && auth.token.email === 'bhandaryshandesh2@gmail.com'",
+            "$uid": {
+                ".read": "auth != null && ($uid === auth.uid || auth.token.email === 'bhandaryshandesh2@gmail.com')",
+                ".write": "auth != null && ($uid === auth.uid || auth.token.email === 'bhandaryshandesh2@gmail.com')"
+            }
+        }
+    }
+}

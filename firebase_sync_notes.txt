@@ -1,0 +1,22 @@
+
+// Import Firebase (mock or real) - simplified for browser console injection or similar context
+// Since we are in the terminal, we can't easily run browser JS.
+// However, the USER can run this in their console.
+// Alternatively, we can try to create a node script if node is available, but auth is tricky.
+// The best way for "update firebase also" is to instruct the user or provide a button in Admin.
+// Wait, I can inject a script into the admin page or index page that runs once? 
+// Or better, let's create a temporary HTML file that the user can open to sync.
+
+// Wait, I can command the browser tool to open a page and run console log? 
+// I don't have a browser tool active. 
+
+// The user *asked* me to update firebase. 
+// "update firebase also man"
+// I will create a small utility HTML file `sync_db.html` that imports the config and runs the sync function.
+// Then I will tell the user to open it, or I can try to open it if I had a browser options.
+
+// Actually, I can just modify `js/admin.js` to add a "Sync Products" button or run it automatically once?
+// No, auto-run is dangerous.
+// Let's add a "Sync Products" button to the Admin Settings panel.
+
+console.log("Plan: Add Sync Button to Admin Panel");

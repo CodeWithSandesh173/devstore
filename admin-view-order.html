@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - Admin</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            background-color: var(--color-background);
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow-lg);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: 5px;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+            border: 1px solid var(--color-border);
+        }
+    </style>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Order Details</h1>
+                <p class="text-muted" id="orderIdDisplay">Loading...</p>
+            </div>
+            <div class="no-print">
+                <button onclick="window.print()" class="btn btn-secondary">🖨️ Print</button>
+                <button onclick="window.location.href='admin.html'" class="btn btn-primary">← Back to Admin</button>
+            </div>
+        </div>
+
+        <div id="loading" class="text-center">Loading order data...</div>
+        <div id="content" style="display: none;">
+            <!-- Content injected here -->
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script>
+        // Check Auth
+        firebase.auth().onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else if (user.email !== "bhandaryshandesh2@gmail.com") {
+                alert("Access Denied");
+                window.location.href = 'shop.html';
+            } else {
+                loadOrder();
+            }
+        });
+
+        function loadOrder() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('id');
+
+            if (!orderId) {
+                alert('No Order ID provided');
+                window.close();
+                return;
+            }
+
+            document.getElementById('orderIdDisplay').innerText = `ID: #${orderId}`;
+
+            firebase.database().ref(`orders/${orderId}`).once('value', snapshot => {
+                const order = snapshot.val();
+                if (!order) {
+                    document.getElementById('loading').innerHTML = '<p class="text-danger">Order not found!</p>';
+                    return;
+                }
+
+                renderOrder(order, orderId);
+            });
+        }
+
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const original = btn.innerText;
+                btn.innerText = '✅';
+                setTimeout(() => btn.innerText = original, 2000);
+            });
+        }
+
+        function renderOrder(order, orderId) {
+            const container = document.getElementById('content');
+            const loading = document.getElementById('loading');
+
+            // Status badge colors
+            const statusColors = {
+                'pending': '#F59E0B',
+                'processing': '#3B82F6',
+                'completed': '#10B981',
+                'cancelled': '#EF4444'
+            };
+            const statusColor = statusColors[order.status] || '#6B7280';
+
+            // Helper
+            const row = (label, val) => `
+                <div style="margin-bottom: 10px;">
+                    <strong>${label}:</strong> 
+                    <span>${val || 'N/A'}</span>
+                    ${val ? `<button class="copy-btn" onclick="copyToClipboard('${val}', this)">📋</button>` : ''}
+                </div>`;
+
+            let html = `
+                <div class="grid-2">
+                    <div>
+                        <h3>Customer Info</h3>
+                        ${row('Email', order.userEmail)}
+                        ${row('User ID', order.userId)}
+                        <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+                        <p><strong>Status:</strong> <span style="display:inline-block; padding:4px 12px; border-radius:4px; background:${statusColor}; color:white; font-weight:bold; font-size:0.9rem;">${order.status.toUpperCase()}</span></p>
+                    </div>
+                    <div>
+                        <h3>Payment Info</h3>
+                        <p><strong>Method:</strong> ${order.paymentMethod || 'N/A'}</p>
+                        ${order.country ? `<p><strong>Country:</strong> ${order.country.charAt(0).toUpperCase() + order.country.slice(1)}</p>` : ''}
+                        ${order.currency ? `<p><strong>Currency:</strong> ${order.currency}</p>` : ''}
+                        ${order.paymentProof ? `
+                            ${row('Account Number', order.paymentProof.accountNumber)}
+                            ${row('Transaction ID', order.paymentProof.transactionId)}
+                        ` : '<p class="text-muted">No payment proof submitted</p>'}
+                    </div>
+                </div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--color-border);">
+
+                <h3>Order Items</h3>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px;">
+            `;
+
+            if (order.items && order.items.length > 0) {
+                order.items.forEach((item, index) => {
+                    const itemPrice = item.price || 'N/A';
+                    const itemCurrency = item.currency || order.currency || '';
+                    html += `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; padding-bottom:10px; ${index < order.items.length - 1 ? 'border-bottom: 1px solid #ddd;' : ''}">
+                            <div>
+                                <strong>${item.productName}</strong>
+                                <div style="color: #6B7280; font-size: 0.9rem;">${item.package}</div>
+                            </div>
+                            <strong>${itemCurrency} ${itemPrice}</strong>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<p class="text-muted">No items found</p>`;
+            }
+
+            // Requirements
+            if (order.requirements && Object.keys(order.requirements).length > 0) {
+                html += `<div style="margin-top:15px; padding-top:15px; border-top:1px dashed #ccc;">
+                    <strong>📋 Account Requirements:</strong>
+                    <div style="margin-top:10px; padding:10px; background:white; border-radius:6px;">`;
+                for (let key in order.requirements) {
+                    const cleanKey = key.replace('requirement_', '').replace(/_/g, ' ').toUpperCase();
+                    html += `<div style="margin-bottom:5px;"><strong>${cleanKey}:</strong> ${order.requirements[key]}</div>`;
+                }
+                html += `</div></div>`;
+            }
+
+            html += `</div>`; // End items box
+
+            // Coupon info
+            if (order.coupon) {
+                html += `
+                    <div style="margin-top: 15px; padding: 10px; background: #FEF3C7; border-left: 4px solid #F59E0B; border-radius: 4px;">
+                        <strong>🎫 Coupon Applied:</strong> ${order.coupon} (${order.discount}% off)
+                    </div>
+                `;
+            }
+
+            // Totals
+            const displayTotal = order.total || '0';
+            const displaySubtotal = order.subtotal || '0';
+            html += `
+                <div style="margin-top: 20px; text-align: right; font-size: 1.2rem;">
+                    <p><strong>Subtotal:</strong> ${displaySubtotal}</p>
+                    ${order.discount ? `<p style="color:#10B981;"><strong>Discount (${order.discount}%):</strong> - ${order.currency || ''} ${Math.round(parseFloat(displaySubtotal) * (order.discount / 100))}</p>` : ''}
+                    <h2 style="color: var(--color-primary); border-top: 2px solid var(--color-border); padding-top: 10px; margin-top: 10px;">
+                        <strong>Total:</strong> ${displayTotal}
+                    </h2>
+                </div>
+            `;
+
+            // Payment Proof Image
+            if (order.paymentProof) {
+                html += `<hr style="margin: 30px 0; border: 0; border-top: 1px solid var(--color-border);">
+                         <h3>💳 Payment Screenshot</h3>`;
+                if (order.paymentProof.base64Image) {
+                    html += `<img src="${order.paymentProof.base64Image}" alt="Payment Proof" style="max-width:100%; border:2px solid var(--color-border);">`;
+                } else if (order.paymentProof.downloadURL || order.paymentProof.imgbbLink) {
+                    const link = order.paymentProof.downloadURL || order.paymentProof.imgbbLink;
+                    html += `<p><a href="${link}" target="_blank" class="btn btn-primary">🔗 View Screenshot Link</a></p>`;
+                } else {
+                    html += `<p class="text-warning">⚠️ Payment proof image not available or format not supported.</p>`;
+                }
+            }
+
+            container.innerHTML = html;
+            container.style.display = 'block';
+            loading.style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

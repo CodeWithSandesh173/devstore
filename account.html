@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Dev Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="images/icon.png" type="image/png">
+</head>
+
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">Dev Store</div>
+            <button class="nav-toggle" onclick="toggleMobileMenu()">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="myorders.html">My Orders</a></li>
+                <li><a href="account.html" class="active">Account</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container section">
+        <h1>My Account</h1>
+
+        <div style="max-width: 600px; margin: 0 auto;">
+
+            <!-- Account Status -->
+            <div class="card">
+                <h2>Account Status</h2>
+                <div style="background: var(--color-background); padding: 1rem; border-radius: var(--border-radius);">
+                    <p style="margin-bottom: 0.5rem;">
+                        <strong>Email Verified:</strong>
+                        <span id="emailVerified">Checking...</span>
+                    </p>
+                    <p style="margin-bottom: 0;">
+                        <strong>Total Orders:</strong>
+                        <span id="totalOrders">Loading...</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Profile Information -->
+            <div class="card mt-3">
+                <h2>Profile Information</h2>
+                <div style="background: var(--color-background); padding: 1rem; border-radius: var(--border-radius);">
+                    <p style="margin-bottom: 0.5rem;">
+                        <strong>Username:</strong>
+                        <span id="username">Loading...</span>
+                    </p>
+                    <p style="margin-bottom: 0;">
+                        <strong>Email:</strong>
+                        <span id="email">Loading...</span>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Dev Store</h3>
+                    <p>Your trusted source for digital products</p>
+                    <div class="social-links">
+                        <a href="https://discord.gg/pFAVbwDu35" target="_blank" title="Discord">D</a>
+                        <a href="https://www.facebook.com/profile.php?id=61585887697031" target="_blank"
+                            title="Facebook">F</a>
+                        <a href="https://instagram.com/devstorenepal" target="_blank" title="Instagram">I</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <a href="shop.html">Shop</a>
+                    <a href="myorders.html">My Orders</a>
+                    <a href="account.html">Account</a>
+                    <a href="legal.html">Legal</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <p>24/7 customer support available</p>
+                    <p>Contact us anytime via chat</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Dev Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        protectPage();
+
+        function toggleMobileMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Email
+            document.getElementById('email').textContent = user.email;
+
+            // Email verified
+            document.getElementById('emailVerified').textContent =
+                user.emailVerified ? '✅ Yes' : '❌ No';
+
+            // Username
+            database.ref('users/' + user.uid).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists() && snapshot.val().username) {
+                        document.getElementById('username').textContent = snapshot.val().username;
+                    } else {
+                        document.getElementById('username').textContent =
+                            user.displayName || user.email.split('@')[0];
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('username').textContent =
+                        user.email.split('@')[0];
+                });
+
+            // Total orders
+            database.ref('orders')
+                .orderByChild('userId')
+                .equalTo(user.uid)
+                .once('value')
+                .then(snapshot => {
+                    document.getElementById('totalOrders').textContent =
+                        snapshot.numChildren();
+                })
+                .catch(() => {
+                    document.getElementById('totalOrders').textContent = '0';
+                });
+
+            // Email Verification Logic
+            const emailVerifiedSpan = document.getElementById('emailVerified');
+            if (!user.emailVerified) {
+                const verifyBtn = document.createElement('button');
+                verifyBtn.textContent = 'Verify Email';
+                verifyBtn.style.marginLeft = '10px';
+                verifyBtn.style.padding = '5px 10px';
+                verifyBtn.style.fontSize = '0.8rem';
+                verifyBtn.style.cursor = 'pointer';
+                verifyBtn.onclick = () => {
+                    user.sendEmailVerification()
+                        .then(() => {
+                            alert('Verification email sent! Please check your inbox.');
+                        })
+                        .catch((error) => {
+                            console.error('Error sending verification email:', error);
+                            alert('Failed to send verification email. Please try again later.');
+                        });
+                };
+                emailVerifiedSpan.appendChild(verifyBtn);
+            }
+
+        });
+    </script>
+</body>
+
+</html>
